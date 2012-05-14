@@ -3,6 +3,7 @@ Create screenshots from websites via json jobfiles
 
 This script creates screenshots from websites via `PhantomJS`_
 
+This script is used as backend for the `Screener`_ webapp.
 
 JSON jobfile
 ++++++++++++
@@ -21,3 +22,4 @@ Jonas Genannt / http://blog.brachium-system.net
 
 
 .. _PhantomJS: http://www.phantomjs.org/
+.. _Screener: http://screener.brachium-system.net/
