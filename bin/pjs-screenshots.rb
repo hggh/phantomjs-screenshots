@@ -7,7 +7,7 @@ require 'fileutils'
 LOCK_FILE="/var/lock/pjs-screenshots"
 JOBS_DIR="/tmp/foo"
 JOBS_DIR_ERROR="/tmp/bar"
-PHANTOMJS_BIN="DISPLAY=:1 /usr/bin/phantomjs"
+PHANTOMJS_BIN="/usr/bin/phantomjs"
 PHANTOMHS_OPTS="--disk-cache=no --ignore-ssl-errors=yes --load-images=yes"
 PHANTONJS_JS="../js/screenshot.js"
 class Lockfile
