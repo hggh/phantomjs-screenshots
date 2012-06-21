@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'json'
 require 'fileutils'
+require 'timeout'
 # Copyright Jonas Genannt <jonas@brachium-system.net>
 # Licensed under the Apache License, Version 2.0
 
@@ -57,14 +58,22 @@ jobfiles.each do |f|
 	json_file = File.join(JOBS_DIR, f)
 	begin
 		json = JSON.parse(File.read(json_file))
-		command = PHANTOMJS_BIN + " " + PHANTOMHS_OPTS + " " + PHANTONJS_JS + " " + json_file
 
-		output = %x{#{command} 2>&1}
-		if $? != 0
-			raise "could not run phantomjs"
+		Timeout::timeout(15) do
+			@pipe = IO.popen(PHANTOMJS_BIN + " " + PHANTOMHS_OPTS + " " + PHANTONJS_JS + " " + json_file)
+			output = @pipe.read
+			Process.wait(@pipe.pid)
+			if $? != 0
+				raise "could not run phantomjs"
+			end
 		end
 
 		File.unlink(json_file)
+
+	rescue Timeout::Error => e
+		Process.kill(9, @pipe.pid)
+		Process.wait(@pipe.pid)
+		FileUtils.mv(json_file, File.join(JOBS_DIR_ERROR, f))
 	rescue Exception => e
 		FileUtils.mv(json_file, File.join(JOBS_DIR_ERROR, f))
 	end
