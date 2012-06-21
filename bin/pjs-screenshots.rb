@@ -2,15 +2,26 @@
 require 'json'
 require 'fileutils'
 require 'timeout'
+require 'yaml'
+require 'optparse'
 # Copyright Jonas Genannt <jonas@brachium-system.net>
 # Licensed under the Apache License, Version 2.0
 
-LOCK_FILE="/var/lock/pjs-screenshots"
-JOBS_DIR="/tmp/foo"
-JOBS_DIR_ERROR="/tmp/bar"
-PHANTOMJS_BIN="/usr/bin/phantomjs"
-PHANTOMHS_OPTS="--disk-cache=no --ignore-ssl-errors=yes --load-images=yes"
-PHANTONJS_JS="../js/screenshot.js"
+options = { :config => '../conf/pjs.conf' }
+OptionParser.new do |opts|
+	opts.banner = "Usage: pjs-screenshots.rb [options]"
+
+	opts.on("-c", "--config CONFIGURATION", "Path to configuration") do |c|
+		options[:config] = c
+	end
+end.parse!
+
+if !File.readable?(options[:config])
+	puts "Could not find (#{options[:config]}) configration, use --config"
+	exit 1
+end
+config = YAML.load(File.read(options[:config]))
+
 class Lockfile
 	@lock = ""
 	@lock_file = ""
@@ -33,34 +44,34 @@ class Lockfile
 	end
 end
 
-lock = Lockfile.new(LOCK_FILE)
+lock = Lockfile.new(config[:lock_file])
 unless lock.lock
 	puts "Script already running"
 	exit 0
 end
 
-unless File.directory?(JOBS_DIR_ERROR)
-	puts "Directory #{JOBS_DIR_ERROR} not available"
+unless File.directory?(config[:job_directory_error])
+	puts "Directory #{config[:job_directory_error]} not available"
 	exit 1
 end
 
-unless File.directory?(JOBS_DIR)
-	puts "Directory #{JOBS_DIR} not available"
+unless File.directory?(config[:job_directory])
+	puts "Directory #{config[:job_directory]} not available"
 	exit 1
 end
 
 current = Dir.getwd
-Dir.chdir(JOBS_DIR)
+Dir.chdir(config[:job_directory])
 jobfiles = Dir.glob("*.json")
 Dir.chdir(current)
 
 jobfiles.each do |f|
-	json_file = File.join(JOBS_DIR, f)
+	json_file = File.join(config[:job_directory], f)
 	begin
 		json = JSON.parse(File.read(json_file))
 
 		Timeout::timeout(15) do
-			@pipe = IO.popen(PHANTOMJS_BIN + " " + PHANTOMHS_OPTS + " " + PHANTONJS_JS + " " + json_file)
+			@pipe = IO.popen(config[:phantomjs_binary] + " " + config[:phantomjs_opts] + " " + config[:phantomjs_script] + " " + json_file)
 			output = @pipe.read
 			Process.wait(@pipe.pid)
 			if $? != 0
@@ -73,9 +84,9 @@ jobfiles.each do |f|
 	rescue Timeout::Error => e
 		Process.kill(9, @pipe.pid)
 		Process.wait(@pipe.pid)
-		FileUtils.mv(json_file, File.join(JOBS_DIR_ERROR, f))
+		FileUtils.mv(json_file, File.join(config[:job_directory_error], f))
 	rescue Exception => e
-		FileUtils.mv(json_file, File.join(JOBS_DIR_ERROR, f))
+		FileUtils.mv(json_file, File.join(config[:job_directory_error], f))
 	end
 end
 

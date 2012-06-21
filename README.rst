@@ -14,6 +14,10 @@ JSON jobfile
 	 "Url":"http://www.fotokasten.de"
 	}
 
+PJS Configuration
++++++++++++++++++
+
+Please use conf/pjs.example.conf as example configuration file.
 
 Contact?
 ++++++++
