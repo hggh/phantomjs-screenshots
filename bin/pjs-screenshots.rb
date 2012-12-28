@@ -1,4 +1,8 @@
 #!/usr/bin/env ruby
+begin
+	require 'rubygems'
+rescue
+end
 require 'json'
 require 'fileutils'
 require 'timeout'
@@ -21,6 +25,14 @@ if !File.readable?(options[:config])
 	exit 1
 end
 config = YAML.load(File.read(options[:config]))
+
+if config[:selenium_phantomjs]
+	require 'selenium-webdriver'
+	if config[:selenium_host] == ''
+		puts "Please set option :selenium_host in configuration"
+		exit 1
+	end
+end
 
 class Lockfile
 	@lock = ""
@@ -69,18 +81,25 @@ jobfiles.each do |f|
 	json_file = File.join(config[:job_directory], f)
 	begin
 		json = JSON.parse(File.read(json_file))
+		viewport = json["ViewPort"].split(/x/)
 
 		Timeout::timeout(15) do
-			@pipe = IO.popen(config[:phantomjs_binary] + " " + config[:phantomjs_opts] + " " + config[:phantomjs_script] + " " + json_file)
-			output = @pipe.read
-			Process.wait(@pipe.pid)
-			if $? != 0
-				raise "could not run phantomjs"
+			if config[:selenium_phantomjs]
+				slweb = Selenium::WebDriver.for(:remote, :url => config[:selenium_host])
+				slweb.manage.window.resize_to(viewport[0],viewport[1])
+				slweb.navigate.to json["Url"]
+				slweb.save_screenshot(json["Output"])
+				slweb.quit
+			else
+				@pipe = IO.popen(config[:phantomjs_binary] + " " + config[:phantomjs_opts] + " " + config[:phantomjs_script] + " " + json_file)
+				output = @pipe.read
+				Process.wait(@pipe.pid)
+				if $? != 0
+					raise "could not run phantomjs"
+				end
 			end
 		end
-
 		File.unlink(json_file)
-
 	rescue Timeout::Error => e
 		Process.kill(9, @pipe.pid)
 		Process.wait(@pipe.pid)
