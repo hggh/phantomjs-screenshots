@@ -20,7 +20,7 @@ OptionParser.new do |opts|
 	end
 end.parse!
 
-if !File.readable?(options[:config])
+unless File.readable?(options[:config])
 	puts "Could not find (#{options[:config]}) configration, use --config"
 	exit 1
 end
