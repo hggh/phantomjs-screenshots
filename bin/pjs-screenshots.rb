@@ -72,6 +72,11 @@ unless File.directory?(config[:job_directory])
 	exit 1
 end
 
+unless File.exists?(config[:phantomjs_binary])
+	puts "PhantomJS binary not available at #{config[:phantomjs_binary]}"
+	exit 1
+end
+
 current = Dir.getwd
 Dir.chdir(config[:job_directory])
 jobfiles = Dir.glob("*.json")
