@@ -92,8 +92,13 @@ jobfiles.each do |f|
 	begin
 		json = JSON.parse(File.read(json_file))
 		viewport = json["ViewPort"].split(/x/)
+		if json["timeout"]
+			timeout = json["timeout"]
+		else
+			timeout = 15
+		end
 
-		Timeout::timeout(15) do
+		Timeout::timeout(timeout) do
 			if config[:selenium_phantomjs]
 				slweb = Selenium::WebDriver.for(:remote, :url => config[:selenium_host])
 				slweb.manage.window.resize_to(viewport[0],viewport[1])
