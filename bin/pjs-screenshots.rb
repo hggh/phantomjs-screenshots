@@ -114,7 +114,7 @@ jobfiles.each do |f|
 				end
 			end
 		end
-		File.unlink(json_file)
+		File.unlink(json_file) unless config[:job_keep_after_success]
 	rescue Timeout::Error => e
 		Process.kill(9, @pipe.pid)
 		Process.wait(@pipe.pid)
