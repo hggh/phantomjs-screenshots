@@ -82,6 +82,11 @@ Dir.chdir(config[:job_directory])
 jobfiles = Dir.glob("*.json")
 Dir.chdir(current)
 
+unless jobfiles.length > 0
+	puts "no jobs found at #{config[:job_directory]}"
+	exit 1
+end
+
 jobfiles.each do |f|
 	json_file = File.join(config[:job_directory], f)
 	begin
