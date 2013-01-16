@@ -10,8 +10,11 @@ JSON jobfile
 
 	{
 	 "Output":"/tmp/foobar.png",
+
 	 "ViewPort":"1280x1024",
+
 	 "Url":"http://www.fotokasten.de"
+
 	}
 
 PJS Configuration
