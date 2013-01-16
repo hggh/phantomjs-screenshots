@@ -4,7 +4,6 @@
 var page = new WebPage();
 var fs   = require('fs');
 page.viewportSize = { width: 1600, height: 1200 };
-page.settings.userAgent = 'HggH PhantomJS Screenshoter';
 
 if (phantom.args.length === 0) {
 	console.log('Usage: screenshot.js <some JSON>');
@@ -20,6 +19,12 @@ try {
 
 var screenshot = JSON.parse(f);
 var view_port  = screenshot.ViewPort.split(/x/);
+var userAgent = screenshot.UserAgent;
+if (userAgent && userAgent !== "") {
+	page.settings.userAgent = userAgent;
+} else {
+	page.settings.userAgent = 'HggH PhantomJS Screenshoter';
+}
 page.viewportSize = { width: view_port[0], height: view_port[1] };
 
 page.onLoadFinished = function (status) {
