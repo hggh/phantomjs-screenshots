@@ -9,11 +9,13 @@ JSON jobfile
 ++++++++++++
 
 	{
-	 "Output":"/tmp/foobar.png",
+	 "Output": "/tmp/foobar.png",
 
-	 "ViewPort":"1280x1024",
+	 "ViewPort": "1280x1024",
 
-	 "Url":"http://www.fotokasten.de"
+	 "Url": "http://www.fotokasten.de",
+
+	 "UserAgent": "HggH Screenshot System with PhantomJS",
 
 	}
 
