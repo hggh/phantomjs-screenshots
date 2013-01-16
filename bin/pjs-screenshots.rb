@@ -93,7 +93,7 @@ jobfiles.each do |f|
 		json = JSON.parse(File.read(json_file))
 		viewport = json["ViewPort"].split(/x/)
 		if json["timeout"]
-			timeout = json["timeout"]
+			timeout = json["timeout"].to_i
 		else
 			timeout = 15
 		end

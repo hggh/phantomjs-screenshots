@@ -17,7 +17,11 @@ JSON jobfile
 
 	 "UserAgent": "HggH Screenshot System with PhantomJS",
 
+	 "timeout": "15"
+
 	}
+
+The configuration flags "UserAgent" and "timeout" are optional. default for "timeout" is 15 seconds.
 
 PJS Configuration
 +++++++++++++++++
