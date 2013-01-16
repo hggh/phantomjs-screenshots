@@ -72,18 +72,33 @@ unless File.directory?(config[:job_directory])
 	exit 1
 end
 
+unless File.exists?(config[:phantomjs_binary])
+	puts "PhantomJS binary not available at #{config[:phantomjs_binary]}"
+	exit 1
+end
+
 current = Dir.getwd
 Dir.chdir(config[:job_directory])
 jobfiles = Dir.glob("*.json")
 Dir.chdir(current)
+
+unless jobfiles.length > 0
+	puts "no jobs found at #{config[:job_directory]}"
+	exit 1
+end
 
 jobfiles.each do |f|
 	json_file = File.join(config[:job_directory], f)
 	begin
 		json = JSON.parse(File.read(json_file))
 		viewport = json["ViewPort"].split(/x/)
+		if json["timeout"]
+			timeout = json["timeout"]
+		else
+			timeout = 15
+		end
 
-		Timeout::timeout(15) do
+		Timeout::timeout(timeout) do
 			if config[:selenium_phantomjs]
 				slweb = Selenium::WebDriver.for(:remote, :url => config[:selenium_host])
 				slweb.manage.window.resize_to(viewport[0],viewport[1])
@@ -99,7 +114,7 @@ jobfiles.each do |f|
 				end
 			end
 		end
-		File.unlink(json_file)
+		File.unlink(json_file) unless config[:job_keep_after_success]
 	rescue Timeout::Error => e
 		Process.kill(9, @pipe.pid)
 		Process.wait(@pipe.pid)
